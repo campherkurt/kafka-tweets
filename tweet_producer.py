@@ -1,5 +1,7 @@
 
 import tweepy
+import json
+
 from kafka import KafkaProducer
 
 
@@ -28,15 +30,14 @@ class TweetProd:
     def __init__(self, host: str, port: int) -> None:
         self.kf_producer = KafkaProducer(bootstrap_servers=f'{host}:{port}')
 
-    def send_tweets(self, topic: str, tweets):
+    def send_tweets(self, topic: str, tweets: list) -> None:
         for tweet in tweets:
-            json_object = {
-                'tweet_text': tweet.text,
-                'user_name': tweet.user.name,
-                'source_url': tweet.source_url,
-                'handle': tweet.user.screen_name
-            }
-            print(self.kf_producer.send(topic, json_object))
+            json_tweet = self.convert_tweet_to_json(tweet)
+            res = self.kf_producer.send(topic, json_tweet)
+            print(res)
 
     def cleanup(self):
         pass
+
+    def convert_tweet_to_json(self, tweet: dict) -> json:
+        return json.dumps(tweet)
