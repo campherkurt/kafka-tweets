@@ -28,13 +28,14 @@ class TweetFetch:
 
 class TweetProd:
     def __init__(self, host: str, port: int) -> None:
-        self.kf_producer = KafkaProducer(bootstrap_servers=f'{host}:{port}')
+        h = f'{host}:{port}'
+        self.kf_producer = KafkaProducer(bootstrap_servers=h)
 
     def send_tweets(self, topic: str, tweets: list) -> None:
         for tweet in tweets:
-            json_tweet = self.convert_tweet_to_json(tweet)
-            res = self.kf_producer.send(topic, json_tweet)
-            print(res)
+            json_tweet = self.convert_tweet_to_json(tweet._json)
+            self.kf_producer.send(topic, json_tweet)
+        self.kf_producer.flush()
 
     def cleanup(self):
         pass
